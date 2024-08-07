@@ -1,113 +1,85 @@
-import Image from 'next/image'
+'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
 
 export default function Home() {
+  const [time, setTime] = useState<number>(0)
+  const [isActive, setIsActive] = useState<boolean>(false)
+  const [totalTime, setTotalTime] = useState<number>(0)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+    if (isActive && time > 0) {
+      interval = setInterval(() => {
+        setTime(prevTime => prevTime - 1)
+      }, 1000)
+    } else if (time === 0 && isActive) {
+      setIsActive(false)
+      if (audioRef.current) {
+        audioRef.current.play()
+      }
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isActive, time])
+
+  const startTimer = (seconds: number) => {
+    setTime(seconds)
+    setTotalTime(seconds)
+    setIsActive(true)
+  }
+
+  const stopTimer = () => {
+    setIsActive(false)
+    setTime(0)
+    setTotalTime(0)
+  }
+
+  const formatTime = (time: number): string => {
+    const minutes = Math.floor(time / 60)
+    const seconds = time % 60
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+  }
+
+  const getColorClass = (): string => {
+    if (time <= 10) return 'text-red-600'
+    if (time <= 30) return 'text-yellow-600'
+    return 'text-blue-600'
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="min-h-screen bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center p-4">
+      <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-md">
+        <h1 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">厨房倒计时</h1>
+        <div className="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+          <div className={`text-6xl sm:text-7xl font-bold text-center font-mono transition-colors duration-300 ${getColorClass()}`}>
+            {formatTime(time)}
+          </div>
+        </div>
+        <div className="w-full h-2 bg-blue-500 rounded-full mb-6 overflow-hidden">
+          <div 
+            className="h-full bg-gray-200 rounded-full transition-all duration-300 ease-linear"
+            style={{ width: `${100 - (time / totalTime) * 100}%`, marginLeft: 'auto' }}
+          ></div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <button onClick={() => startTimer(60)} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-4 rounded-full transition duration-300 text-lg">
+            1分钟
+          </button>
+          <button onClick={() => startTimer(180)} className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-full transition duration-300 text-lg">
+            3分钟
+          </button>
+          <button onClick={() => startTimer(300)} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-4 rounded-full transition duration-300 text-lg">
+            5分钟
+          </button>
+          <button onClick={stopTimer} className="bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-4 rounded-full transition duration-300 text-lg">
+            停止
+          </button>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      <audio ref={audioRef} src="/alarm.mp3" />
+    </div>
   )
 }
