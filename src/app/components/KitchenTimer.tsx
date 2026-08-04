@@ -10,17 +10,20 @@ const KitchenTimer: React.FC = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
+    let cancelled = false
     if (isActive && time > 0) {
       interval = setInterval(() => {
         setTime(prevTime => prevTime - 1)
       }, 1000)
     } else if (time === 0 && isActive) {
-      setIsActive(false)
-      if (audioRef.current) {
-        audioRef.current.play()
-      }
+      queueMicrotask(() => {
+        if (cancelled) return
+        setIsActive(false)
+        void audioRef.current?.play()
+      })
     }
     return () => {
+      cancelled = true
       if (interval) clearInterval(interval)
     }
   }, [isActive, time])
