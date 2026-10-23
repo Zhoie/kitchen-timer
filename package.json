@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:security": "node --test scripts/test-braces-security.mjs",
+    "prebuild": "node --test scripts/test-braces-security.mjs"
   },
   "dependencies": {
     "@types/node": "22.1.0",
@@ -14,9 +16,9 @@
     "@types/react-dom": "19.2.4",
     "autoprefixer": "10.4.20",
     "eslint": "9.39.5",
-    "eslint-config-next": "16.3.0",
-    "next": "16.3.0",
-    "postcss": "8.4.41",
+    "eslint-config-next": "16.4.2",
+    "next": "16.4.2",
+    "postcss": "8.5.31",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwindcss": "3.4.7",
@@ -24,5 +26,12 @@
   },
   "engines": {
     "node": ">=24.22.1 <25"
+  },
+  "overrides": {
+    "postcss-selector-parser": "7.1.7",
+    "braces": "$braces"
+  },
+  "devDependencies": {
+    "braces": "file:./vendor/braces-security/braces-security.tgz"
   }
 }
